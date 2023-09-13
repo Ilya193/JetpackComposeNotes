@@ -85,7 +85,7 @@ fun Greeting(viewModel: MainViewModel = hiltViewModel()) {
             Modifier.weight(1f)
         ) {
             itemsIndexed(items = words) { index, item ->
-                cardElement(index = index, callback = {
+                cardElement(index = index, item, callback = {
                     textInput = ""
                 })
             }
@@ -116,9 +116,7 @@ fun Greeting(viewModel: MainViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun cardElement(index: Int, callback: () -> Unit, viewModel: MainViewModel = hiltViewModel()) {
-    val words = viewModel.words.collectAsState().value
-
+fun cardElement(index: Int, item: Note, callback: () -> Unit, viewModel: MainViewModel = hiltViewModel()) {
     Row(
         modifier = Modifier.fillMaxSize().pointerInput(Unit){
             detectTapGestures(
@@ -131,7 +129,7 @@ fun cardElement(index: Int, callback: () -> Unit, viewModel: MainViewModel = hil
     ) {
         Text(
             modifier = Modifier.width(150.dp).height(75.dp),
-            text = AnnotatedString(words[index].text),
+            text = AnnotatedString(item.text),
             style = TextStyle(fontSize = 18.sp),
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -141,7 +139,7 @@ fun cardElement(index: Int, callback: () -> Unit, viewModel: MainViewModel = hil
             }
         ) {
             Icon(
-                painter = painterResource(if (words[index].isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border),
+                painter = painterResource(if (item.isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border),
                 contentDescription = null,
             )
         }
