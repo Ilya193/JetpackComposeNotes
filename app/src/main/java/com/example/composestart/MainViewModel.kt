@@ -39,4 +39,11 @@ class MainViewModel @Inject constructor() : ViewModel() {
         val temp = list.map { it.copy() }
         _words.value = temp
     }
+
+    fun search(text: String) {
+        val temp = list.filter {
+            it.text.contains(text)
+        }
+        _words.value = temp
+    }
 }

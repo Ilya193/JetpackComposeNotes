@@ -1,10 +1,8 @@
 package com.example.composestart
 
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -70,27 +65,44 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Greeting(viewModel: MainViewModel = hiltViewModel()) {
-    var textInput by rememberSaveable { mutableStateOf("") }
+    var noteText by rememberSaveable { mutableStateOf("") }
+    var searchNoteText by rememberSaveable { mutableStateOf("") }
     val words = viewModel.words.collectAsState().value
 
     Column(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        if (words.isNotEmpty()) {
+            OutlinedTextField(
+                value = searchNoteText,
+                onValueChange = {
+                    searchNoteText = it
+                    viewModel.search(it)
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
+                placeholder = { Text(text = "Search") },
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_search_24),
+                        contentDescription = null,
+                    )
+                }
+            )
+        }
         LazyColumn(
             Modifier.weight(1f)
         ) {
             itemsIndexed(items = words) { index, item ->
                 cardElement(index = index, item, callback = {
-                    textInput = ""
+                    noteText = ""
                 })
             }
         }
-        Row(
-        ) {
+        Row {
             OutlinedTextField(
-                value = textInput,
+                value = noteText,
                 onValueChange = {
-                    textInput = it
+                    noteText = it
                 },
             )
 
@@ -98,8 +110,8 @@ fun Greeting(viewModel: MainViewModel = hiltViewModel()) {
 
             IconButton(
                 onClick = {
-                    viewModel.insert(textInput)
-                    textInput = ""
+                    viewModel.insert(noteText)
+                    noteText = ""
                 }
             ) {
                 Icon(
