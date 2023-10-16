@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,56 +73,85 @@ fun Greeting(viewModel: MainViewModel = hiltViewModel()) {
     var noteText by rememberSaveable { mutableStateOf("") }
     var searchNoteText by rememberSaveable { mutableStateOf("") }
     val words = viewModel.words.collectAsState().value
+    var searchMode by rememberSaveable { mutableStateOf(false) }
 
     Column(
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        if (words.isNotEmpty()) {
-            OutlinedTextField(
-                value = searchNoteText,
-                onValueChange = {
-                    searchNoteText = it
-                    viewModel.search(it)
-                },
-                modifier = Modifier.fillMaxWidth().padding(top = 5.dp),
-                placeholder = { Text(text = "Search") },
-                trailingIcon = {
+        TopAppBar(
+            title = {
+                Text("Notes")
+            },
+            actions = {
+                if (!searchMode) {
+                    IconButton(onClick = {
+                        searchMode = true
+                    }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    }
+                } else {
+                    TextField(
+                        value = searchNoteText,
+                        onValueChange = {
+                            searchNoteText = it
+                            viewModel.search(it)
+                        },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        placeholder = {
+                            Text(text = "Search")
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = "Search",
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                searchMode = false
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close",
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        )
+        Column {
+            LazyColumn(
+                Modifier.weight(1f)
+            ) {
+                itemsIndexed(items = words) { index, item ->
+                    cardElement(index = index, item, callback = {
+                        //noteText = ""
+                    })
+                }
+            }
+            Row(
+                modifier = Modifier.padding(10.dp)
+            ) {
+                OutlinedTextField(
+                    value = noteText,
+                    onValueChange = {
+                        noteText = it
+                    },
+                    modifier = Modifier.fillMaxWidth(0.88f)
+                )
+
+                IconButton(
+                    onClick = {
+                        viewModel.insert(noteText)
+                        noteText = ""
+                    },
+                ) {
                     Icon(
-                        painter = painterResource(R.drawable.baseline_search_24),
+                        painter = painterResource(R.drawable.ic_save),
                         contentDescription = null,
                     )
                 }
-            )
-        }
-        LazyColumn(
-            Modifier.weight(1f)
-        ) {
-            itemsIndexed(items = words) { index, item ->
-                cardElement(index = index, item, callback = {
-                    noteText = ""
-                })
-            }
-        }
-        Row {
-            OutlinedTextField(
-                value = noteText,
-                onValueChange = {
-                    noteText = it
-                },
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            IconButton(
-                onClick = {
-                    viewModel.insert(noteText)
-                    noteText = ""
-                }
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_save),
-                    contentDescription = null,
-                )
             }
         }
     }
